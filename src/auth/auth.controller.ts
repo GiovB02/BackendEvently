@@ -7,12 +7,20 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  async register(@Body() body: Pick<User, 'email' | 'displayName'> & {password: string}): Promise<User> {
-    return this.authService.register(body.email, body.password, body.displayName);
+  async register(
+    @Body() body: Pick<User, 'email' | 'displayName'> & { password: string },
+  ): Promise<User> {
+    return this.authService.register(
+      body.email,
+      body.password,
+      body.displayName,
+    );
   }
 
   @Post('login')
-  async login(@Body() body: Pick<User, 'email'> & {password: string}): Promise<{token: string}> {
+  async login(
+    @Body() body: Pick<User, 'email'> & { password: string },
+  ): Promise<{ token: string }> {
     return this.authService.login(body.email, body.password);
   }
 }

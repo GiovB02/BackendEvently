@@ -13,7 +13,7 @@ export class AuthGuard implements CanActivate {
 
     try {
       const decodedToken = await admin.auth().verifyIdToken(token);
-      (request as any).user = decodedToken;
+      request.user = decodedToken;
       return true;
     } catch (error) {
       return false;

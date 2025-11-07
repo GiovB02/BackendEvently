@@ -4,7 +4,11 @@ import { User } from '../models/evently.models';
 
 @Injectable()
 export class AuthService {
-  async register(email: string, password: string, displayName: string): Promise<User> {
+  async register(
+    email: string,
+    password: string,
+    displayName: string,
+  ): Promise<User> {
     const userRecord = await admin.auth().createUser({
       email,
       password,

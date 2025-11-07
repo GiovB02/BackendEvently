@@ -16,7 +16,9 @@ export class UsersService {
       this._db = admin.firestore();
       return this._db;
     } else {
-      this.logger.warn('Firebase not initialized. Using mock database for UsersService.');
+      this.logger.warn(
+        'Firebase not initialized. Using mock database for UsersService.',
+      );
       // Return a mock object that won't crash the app
       return this.createMockDb() as any;
     }
@@ -45,17 +47,42 @@ export class UsersService {
     return userDoc.data() as User;
   }
 
+  async updateUser(uid: string, data: { displayName?: string }): Promise<User> {
+    if (data.displayName !== undefined) {
+      // Update display name in Firebase Auth
+      await admin.auth().updateUser(uid, { displayName: data.displayName });
+
+      // Reflect change in Firestore user document
+      await this.db
+        .collection('users')
+        .doc(uid)
+        .update({ displayName: data.displayName });
+    }
+
+    const user = await this.getUser(uid);
+    if (!user) {
+      throw new (require('@nestjs/common').NotFoundException)(`User with uid ${uid} not found`);
+    }
+    return user;
+  }
+
   async addFriend(uid: string, friendId: string): Promise<User> {
-    await this.db.collection('users').doc(uid).update({
-      friends: admin.firestore.FieldValue.arrayUnion(friendId),
-    });
+    await this.db
+      .collection('users')
+      .doc(uid)
+      .update({
+        friends: admin.firestore.FieldValue.arrayUnion(friendId),
+      });
     return this.getUser(uid);
   }
 
   async removeFriend(uid: string, friendId: string): Promise<User> {
-    await this.db.collection('users').doc(uid).update({
-      friends: admin.firestore.FieldValue.arrayRemove(friendId),
-    });
+    await this.db
+      .collection('users')
+      .doc(uid)
+      .update({
+        friends: admin.firestore.FieldValue.arrayRemove(friendId),
+      });
     return this.getUser(uid);
   }
 
@@ -64,7 +91,30 @@ export class UsersService {
     if (!user.friends || user.friends.length === 0) {
       return [];
     }
-    const friendsSnapshot = await this.db.collection('users').where(admin.firestore.FieldPath.documentId(), 'in', user.friends).get();
-    return friendsSnapshot.docs.map(doc => doc.data() as User);
+    const friendsSnapshot = await this.db
+      .collection('users')
+      .where(admin.firestore.FieldPath.documentId(), 'in', user.friends)
+      .get();
+    return friendsSnapshot.docs.map((doc) => doc.data() as User);
+  }
+
+  async saveEvent(uid: string, eventId: string): Promise<User> {
+    await this.db
+      .collection('users')
+      .doc(uid)
+      .update({
+        savedEvents: admin.firestore.FieldValue.arrayUnion(eventId),
+      });
+    return this.getUser(uid);
+  }
+
+  async removeSavedEvent(uid: string, eventId: string): Promise<User> {
+    await this.db
+      .collection('users')
+      .doc(uid)
+      .update({
+        savedEvents: admin.firestore.FieldValue.arrayRemove(eventId),
+      });
+    return this.getUser(uid);
   }
 }

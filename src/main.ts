@@ -13,10 +13,18 @@ async function bootstrap() {
       credential: admin.credential.cert(serviceAccount),
     });
   } else {
-    console.warn('***********************************************************************');
-    console.warn('* WARNING: Firebase Admin SDK not initialized.                    *');
-    console.warn('* Please replace the placeholder values in serviceAccountKey.json with your actual Firebase project credentials.     *');
-    console.warn('***********************************************************************');
+    console.warn(
+      '***********************************************************************',
+    );
+    console.warn(
+      '* WARNING: Firebase Admin SDK not initialized.                    *',
+    );
+    console.warn(
+      '* Please replace the placeholder values in serviceAccountKey.json with your actual Firebase project credentials.     *',
+    );
+    console.warn(
+      '***********************************************************************',
+    );
   }
 
   const server = express();

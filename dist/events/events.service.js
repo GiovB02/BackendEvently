@@ -76,10 +76,14 @@ let EventsService = EventsService_1 = class EventsService {
             collection: () => mockCollection,
         };
     }
-    async createEvent(event, creator) {
-        const eventData = { ...event, creator: creator.uid, attendees: [creator.uid] };
+    async createEvent(event, creatorUid) {
+        const eventData = {
+            ...event,
+            creator: creatorUid,
+            attendees: [creatorUid],
+        };
         const docRef = await this.db.collection('events').add(eventData);
-        return { ...event, id: docRef.id };
+        return { ...eventData, id: docRef.id };
     }
     async getEvent(id) {
         const doc = await this.db.collection('events').doc(id).get();
@@ -90,7 +94,7 @@ let EventsService = EventsService_1 = class EventsService {
     }
     async getEvents() {
         const snapshot = await this.db.collection('events').get();
-        return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        return snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
     }
     async updateEvent(id, event, userId) {
         const eventToUpdate = await this.getEvent(id);
@@ -108,14 +112,32 @@ let EventsService = EventsService_1 = class EventsService {
         await this.db.collection('events').doc(id).delete();
     }
     async attendEvent(eventId, userId) {
-        await this.db.collection('events').doc(eventId).update({
+        await this.db
+            .collection('events')
+            .doc(eventId)
+            .update({
             attendees: admin.firestore.FieldValue.arrayUnion(userId),
+        });
+        await this.db
+            .collection('users')
+            .doc(userId)
+            .update({
+            attendingEvents: admin.firestore.FieldValue.arrayUnion(eventId),
         });
         return this.getEvent(eventId);
     }
     async unattendEvent(eventId, userId) {
-        await this.db.collection('events').doc(eventId).update({
+        await this.db
+            .collection('events')
+            .doc(eventId)
+            .update({
             attendees: admin.firestore.FieldValue.arrayRemove(userId),
+        });
+        await this.db
+            .collection('users')
+            .doc(userId)
+            .update({
+            attendingEvents: admin.firestore.FieldValue.arrayRemove(eventId),
         });
         return this.getEvent(eventId);
     }

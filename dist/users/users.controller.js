@@ -25,6 +25,12 @@ let UsersController = class UsersController {
         const uid = req.user.uid;
         return this.usersService.getUser(uid);
     }
+    async updateMe(req, body) {
+        const uid = req.user.uid;
+        return await this.usersService.updateUser(uid, {
+            displayName: body.displayName,
+        });
+    }
     async addFriend(req, body) {
         const uid = req.user.uid;
         return this.usersService.addFriend(uid, body.friendId);
@@ -37,6 +43,14 @@ let UsersController = class UsersController {
         const uid = req.user.uid;
         return this.usersService.getFriends(uid);
     }
+    async saveEvent(req, body) {
+        const uid = req.user.uid;
+        return this.usersService.saveEvent(uid, body.eventId);
+    }
+    async removeSavedEvent(req, eventId) {
+        const uid = req.user.uid;
+        return this.usersService.removeSavedEvent(uid, eventId);
+    }
 };
 exports.UsersController = UsersController;
 __decorate([
@@ -46,6 +60,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getMe", null);
+__decorate([
+    (0, common_1.Put)('me'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "updateMe", null);
 __decorate([
     (0, common_1.Post)('friends'),
     __param(0, (0, common_1.Req)()),
@@ -69,6 +91,22 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getFriends", null);
+__decorate([
+    (0, common_1.Post)('saved-events'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "saveEvent", null);
+__decorate([
+    (0, common_1.Delete)('saved-events/:eventId'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('eventId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "removeSavedEvent", null);
 exports.UsersController = UsersController = __decorate([
     (0, common_1.Controller)('users'),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard),

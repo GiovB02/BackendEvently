@@ -1,6 +1,11 @@
-import { Injectable, Logger, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  UnauthorizedException,
+  NotFoundException,
+} from '@nestjs/common';
 import * as admin from 'firebase-admin';
-import { Event, User } from '../models/evently.models';
+import { Event } from '../models/evently.models';
 
 @Injectable()
 export class EventsService {
@@ -15,7 +20,9 @@ export class EventsService {
       this._db = admin.firestore();
       return this._db;
     } else {
-      this.logger.warn('Firebase not initialized. Using mock database for EventsService.');
+      this.logger.warn(
+        'Firebase not initialized. Using mock database for EventsService.',
+      );
       return this.createMockDb() as any;
     }
   }
@@ -38,10 +45,14 @@ export class EventsService {
     };
   }
 
-  async createEvent(event: Event, creator: User): Promise<Event> {
-    const eventData = { ...event, creator: creator.uid, attendees: [creator.uid] };
+  async createEvent(event: Event, creatorUid: string): Promise<Event> {
+    const eventData: Omit<Event, 'id'> = {
+      ...event,
+      creator: creatorUid,
+      attendees: [creatorUid],
+    };
     const docRef = await this.db.collection('events').add(eventData);
-    return { ...event, id: docRef.id };
+    return { ...(eventData as Event), id: docRef.id };
   }
 
   async getEvent(id: string): Promise<Event> {
@@ -54,10 +65,14 @@ export class EventsService {
 
   async getEvents(): Promise<Event[]> {
     const snapshot = await this.db.collection('events').get();
-    return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Event));
+    return snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as Event);
   }
 
-  async updateEvent(id: string, event: Partial<Event>, userId: string): Promise<Event> {
+  async updateEvent(
+    id: string,
+    event: Partial<Event>,
+    userId: string,
+  ): Promise<Event> {
     const eventToUpdate = await this.getEvent(id);
     if (eventToUpdate.creator !== userId) {
       throw new UnauthorizedException('You are not the creator of this event.');
@@ -75,16 +90,35 @@ export class EventsService {
   }
 
   async attendEvent(eventId: string, userId: string): Promise<Event> {
-    await this.db.collection('events').doc(eventId).update({
-      attendees: admin.firestore.FieldValue.arrayUnion(userId),
-    });
+    await this.db
+      .collection('events')
+      .doc(eventId)
+      .update({
+        attendees: admin.firestore.FieldValue.arrayUnion(userId),
+      });
+    // Also update the user profile.
+    await this.db
+      .collection('users')
+      .doc(userId)
+      .update({
+        attendingEvents: admin.firestore.FieldValue.arrayUnion(eventId),
+      });
     return this.getEvent(eventId);
   }
 
   async unattendEvent(eventId: string, userId: string): Promise<Event> {
-    await this.db.collection('events').doc(eventId).update({
-      attendees: admin.firestore.FieldValue.arrayRemove(userId),
-    });
+    await this.db
+      .collection('events')
+      .doc(eventId)
+      .update({
+        attendees: admin.firestore.FieldValue.arrayRemove(userId),
+      });
+    await this.db
+      .collection('users')
+      .doc(userId)
+      .update({
+        attendingEvents: admin.firestore.FieldValue.arrayRemove(eventId),
+      });
     return this.getEvent(eventId);
   }
 }

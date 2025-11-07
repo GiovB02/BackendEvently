@@ -16,7 +16,7 @@ exports.PlansModule = PlansModule;
 exports.PlansModule = PlansModule = __decorate([
     (0, common_1.Module)({
         providers: [plans_service_1.PlansService],
-        controllers: [plans_controller_1.PlansController]
+        controllers: [plans_controller_1.PlansController],
     })
 ], PlansModule);
 //# sourceMappingURL=plans.module.js.map

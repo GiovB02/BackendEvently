@@ -1,10 +1,10 @@
-import { Event, User } from '../models/evently.models';
+import { Event } from '../models/evently.models';
 export declare class EventsService {
     private _db;
     private readonly logger;
     private get db();
     private createMockDb;
-    createEvent(event: Event, creator: User): Promise<Event>;
+    createEvent(event: Event, creatorUid: string): Promise<Event>;
     getEvent(id: string): Promise<Event>;
     getEvents(): Promise<Event[]>;
     updateEvent(id: string, event: Partial<Event>, userId: string): Promise<Event>;

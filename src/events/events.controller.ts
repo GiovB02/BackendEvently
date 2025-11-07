@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Param, Delete, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { EventsService } from './events.service';
 import type { Event } from '../models/evently.models';
 import type { Request } from 'express';
@@ -36,19 +45,28 @@ export class EventsController {
   }
 
   @Delete(':id')
-  async deleteEvent(@Req() req: Request, @Param('id') id: string): Promise<void> {
+  async deleteEvent(
+    @Req() req: Request,
+    @Param('id') id: string,
+  ): Promise<void> {
     const uid = (req as any).user.uid;
     return this.eventsService.deleteEvent(id, uid);
   }
 
   @Post(':id/attend')
-  async attendEvent(@Req() req: Request, @Param('id') id: string): Promise<Event> {
+  async attendEvent(
+    @Req() req: Request,
+    @Param('id') id: string,
+  ): Promise<Event> {
     const uid = (req as any).user.uid;
     return this.eventsService.attendEvent(id, uid);
   }
 
-  @Post(':id/unattend')
-  async unattendEvent(@Req() req: Request, @Param('id') id: string): Promise<Event> {
+  @Delete(':id/attend')
+  async unattendEvent(
+    @Req() req: Request,
+    @Param('id') id: string,
+  ): Promise<Event> {
     const uid = (req as any).user.uid;
     return this.eventsService.unattendEvent(id, uid);
   }

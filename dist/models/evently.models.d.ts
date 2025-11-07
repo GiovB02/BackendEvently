@@ -12,4 +12,14 @@ export interface User {
     email: string;
     displayName: string;
     friends: string[];
+    attendingEvents?: string[];
+    savedEvents?: string[];
+}
+export interface Plan {
+    id: string;
+    eventId: string;
+    createdBy: string;
+    invitedFriends: number;
+    status: 'active' | 'cancelled';
+    invitedContacts?: string[];
 }

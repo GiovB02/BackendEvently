@@ -80,14 +80,30 @@ let UsersService = UsersService_1 = class UsersService {
         const userDoc = await this.db.collection('users').doc(uid).get();
         return userDoc.data();
     }
+    async updateUser(uid, data) {
+        if (data.displayName !== undefined) {
+            await admin.auth().updateUser(uid, { displayName: data.displayName });
+            await this.db
+                .collection('users')
+                .doc(uid)
+                .update({ displayName: data.displayName });
+        }
+        return this.getUser(uid);
+    }
     async addFriend(uid, friendId) {
-        await this.db.collection('users').doc(uid).update({
+        await this.db
+            .collection('users')
+            .doc(uid)
+            .update({
             friends: admin.firestore.FieldValue.arrayUnion(friendId),
         });
         return this.getUser(uid);
     }
     async removeFriend(uid, friendId) {
-        await this.db.collection('users').doc(uid).update({
+        await this.db
+            .collection('users')
+            .doc(uid)
+            .update({
             friends: admin.firestore.FieldValue.arrayRemove(friendId),
         });
         return this.getUser(uid);
@@ -97,8 +113,29 @@ let UsersService = UsersService_1 = class UsersService {
         if (!user.friends || user.friends.length === 0) {
             return [];
         }
-        const friendsSnapshot = await this.db.collection('users').where(admin.firestore.FieldPath.documentId(), 'in', user.friends).get();
-        return friendsSnapshot.docs.map(doc => doc.data());
+        const friendsSnapshot = await this.db
+            .collection('users')
+            .where(admin.firestore.FieldPath.documentId(), 'in', user.friends)
+            .get();
+        return friendsSnapshot.docs.map((doc) => doc.data());
+    }
+    async saveEvent(uid, eventId) {
+        await this.db
+            .collection('users')
+            .doc(uid)
+            .update({
+            savedEvents: admin.firestore.FieldValue.arrayUnion(eventId),
+        });
+        return this.getUser(uid);
+    }
+    async removeSavedEvent(uid, eventId) {
+        await this.db
+            .collection('users')
+            .doc(uid)
+            .update({
+            savedEvents: admin.firestore.FieldValue.arrayRemove(eventId),
+        });
+        return this.getUser(uid);
     }
 };
 exports.UsersService = UsersService;
