@@ -88,7 +88,11 @@ let UsersService = UsersService_1 = class UsersService {
                 .doc(uid)
                 .update({ displayName: data.displayName });
         }
-        return this.getUser(uid);
+        const user = await this.getUser(uid);
+        if (!user) {
+            throw new (require('@nestjs/common').NotFoundException)(`User with uid ${uid} not found`);
+        }
+        return user;
     }
     async addFriend(uid, friendId) {
         await this.db

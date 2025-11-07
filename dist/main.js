@@ -41,24 +41,40 @@ const app_module_1 = require("./app.module");
 const express_1 = __importDefault(require("express"));
 const admin = __importStar(require("firebase-admin"));
 const platform_express_1 = require("@nestjs/platform-express");
+const node_fs_1 = __importDefault(require("node:fs"));
+const node_path_1 = __importDefault(require("node:path"));
 async function bootstrap() {
-    const serviceAccount = require('../serviceAccountKey.json');
-    if (serviceAccount.project_id !== 'YOUR_PROJECT_ID') {
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
-        });
-    }
-    else {
-        console.warn('***********************************************************************');
-        console.warn('* WARNING: Firebase Admin SDK not initialized.                    *');
-        console.warn('* Please replace the placeholder values in serviceAccountKey.json with your actual Firebase project credentials.     *');
-        console.warn('***********************************************************************');
+    if (admin.apps.length === 0) {
+        try {
+            if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+                admin.initializeApp({
+                    credential: admin.credential.applicationDefault(),
+                });
+            }
+            else {
+                const keyPath = node_path_1.default.join(__dirname, '..', 'serviceAccountKey.json');
+                if (node_fs_1.default.existsSync(keyPath)) {
+                    const raw = node_fs_1.default.readFileSync(keyPath, 'utf-8');
+                    const serviceAccount = JSON.parse(raw);
+                    admin.initializeApp({
+                        credential: admin.credential.cert(serviceAccount),
+                    });
+                }
+                else {
+                    console.warn('No Firebase credentials found. Skipping initialization.');
+                }
+            }
+        }
+        catch (e) {
+            console.warn('Firebase Admin initialization skipped:', e);
+        }
     }
     const server = (0, express_1.default)();
     const app = await core_1.NestFactory.create(app_module_1.AppModule, new platform_express_1.ExpressAdapter(server));
     app.enableCors();
-    await app.listen(3001);
+    const port = process.env.PORT ? Number(process.env.PORT) : 3001;
+    await app.listen(port);
     console.log(`Application is running on: ${await app.getUrl()}`);
 }
-bootstrap();
+void bootstrap();
 //# sourceMappingURL=main.js.map

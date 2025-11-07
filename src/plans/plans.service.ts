@@ -55,7 +55,7 @@ export class PlansService {
     const planData: Omit<Plan, 'id'> = {
       eventId,
       createdBy,
-      invitedContactsCount: invitedContacts?.length ?? 0,
+      invitedFriends: invitedContacts?.length ?? 0,
       status: 'active',
       invitedContacts,
     };
