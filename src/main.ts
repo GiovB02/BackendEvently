@@ -5,6 +5,7 @@ import * as admin from 'firebase-admin';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import fs from 'node:fs';
 import path from 'node:path';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   // Initialize Firebase Admin SDK (prefers GOOGLE_APPLICATION_CREDENTIALS)
@@ -38,6 +39,7 @@ async function bootstrap() {
 
   const server = express();
   const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
+  app.useGlobalPipes(new ValidationPipe());
   app.enableCors(); // Enable CORS for all routes
 
   const port = process.env.PORT ? Number(process.env.PORT) : 3001;

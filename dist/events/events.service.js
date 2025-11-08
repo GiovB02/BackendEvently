@@ -60,16 +60,28 @@ let EventsService = EventsService_1 = class EventsService {
         }
     }
     createMockDb() {
+        const mockEvent = {
+            id: 'mock-event-id',
+            name: 'Mock Event',
+            description: 'This is a mock event.',
+            date: new Date().toISOString(),
+            location: 'Mock Location',
+            creator: 'mock-user-id',
+            attendees: ['mock-user-id'],
+        };
         const mockDoc = {
-            get: () => Promise.resolve({ exists: false, data: () => null }),
+            get: () => Promise.resolve({ exists: true, data: () => mockEvent }),
             set: () => Promise.resolve(),
             update: () => Promise.resolve(),
             delete: () => Promise.resolve(),
         };
         const mockCollection = {
-            doc: () => mockDoc,
+            doc: (docId) => ({
+                ...mockDoc,
+                id: docId,
+            }),
             where: () => mockCollection,
-            get: () => Promise.resolve({ empty: true, docs: [] }),
+            get: () => Promise.resolve({ empty: false, docs: [{ data: () => mockEvent }] }),
             add: () => Promise.resolve(mockDoc),
         };
         return {
@@ -101,7 +113,15 @@ let EventsService = EventsService_1 = class EventsService {
         if (eventToUpdate.creator !== userId) {
             throw new common_1.UnauthorizedException('You are not the creator of this event.');
         }
-        await this.db.collection('events').doc(id).update(event);
+        const updateData = Object.entries(event).reduce((acc, [key, value]) => {
+            if (value !== undefined) {
+                acc[key] = value;
+            }
+            return acc;
+        }, {});
+        if (Object.keys(updateData).length > 0) {
+            await this.db.collection('events').doc(id).update(updateData);
+        }
         return this.getEvent(id);
     }
     async deleteEvent(id, userId) {

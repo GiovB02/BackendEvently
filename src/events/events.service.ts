@@ -6,6 +6,8 @@ import {
 } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { Event } from '../models/evently.models';
+import { CreateEventDto } from './dto/create-event.dto';
+import { UpdateEventDto } from './dto/update-event.dto';
 
 @Injectable()
 export class EventsService {
@@ -28,16 +30,30 @@ export class EventsService {
   }
 
   private createMockDb() {
+    const mockEvent: Event = {
+      id: 'mock-event-id',
+      name: 'Mock Event',
+      description: 'This is a mock event.',
+      date: new Date().toISOString(),
+      location: 'Mock Location',
+      creator: 'mock-user-id',
+      attendees: ['mock-user-id'],
+    };
+
     const mockDoc = {
-      get: () => Promise.resolve({ exists: false, data: () => null }),
+      get: () => Promise.resolve({ exists: true, data: () => mockEvent }),
       set: () => Promise.resolve(),
       update: () => Promise.resolve(),
       delete: () => Promise.resolve(),
     };
     const mockCollection = {
-      doc: () => mockDoc,
+      doc: (docId: string) => ({
+        ...mockDoc,
+        id: docId,
+      }),
       where: () => mockCollection,
-      get: () => Promise.resolve({ empty: true, docs: [] }),
+      get: () =>
+        Promise.resolve({ empty: false, docs: [{ data: () => mockEvent }] }),
       add: () => Promise.resolve(mockDoc),
     };
     return {
@@ -45,7 +61,7 @@ export class EventsService {
     };
   }
 
-  async createEvent(event: Event, creatorUid: string): Promise<Event> {
+  async createEvent(event: CreateEventDto, creatorUid: string): Promise<Event> {
     const eventData: Omit<Event, 'id'> = {
       ...event,
       creator: creatorUid,
@@ -70,14 +86,24 @@ export class EventsService {
 
   async updateEvent(
     id: string,
-    event: Partial<Event>,
+    event: UpdateEventDto,
     userId: string,
   ): Promise<Event> {
     const eventToUpdate = await this.getEvent(id);
     if (eventToUpdate.creator !== userId) {
       throw new UnauthorizedException('You are not the creator of this event.');
     }
-    await this.db.collection('events').doc(id).update(event);
+    const updateData = Object.entries(event).reduce((acc, [key, value]) => {
+      if (value !== undefined) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
+
+    if (Object.keys(updateData).length > 0) {
+      await this.db.collection('events').doc(id).update(updateData);
+    }
+
     return this.getEvent(id);
   }
 

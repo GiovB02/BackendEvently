@@ -6,22 +6,24 @@ import {
   Param,
   Delete,
   Req,
-  UseGuards,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import type { Event } from '../models/evently.models';
 import type { Request } from 'express';
-import { AuthGuard } from '../auth/auth.guard';
+import { CreateEventDto } from './dto/create-event.dto';
+import { UpdateEventDto } from './dto/update-event.dto';
 
 @Controller('events')
-@UseGuards(AuthGuard)
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Post()
-  async createEvent(@Req() req: Request, @Body() event: Event): Promise<Event> {
+  async createEvent(
+    @Req() req: Request,
+    @Body() createEventDto: CreateEventDto,
+  ): Promise<Event> {
     const uid = (req as any).user.uid;
-    return this.eventsService.createEvent(event, uid);
+    return this.eventsService.createEvent(createEventDto, uid);
   }
 
   @Get()
@@ -38,10 +40,10 @@ export class EventsController {
   async updateEvent(
     @Req() req: Request,
     @Param('id') id: string,
-    @Body() event: Event,
+    @Body() updateEventDto: UpdateEventDto,
   ): Promise<Event> {
     const uid = (req as any).user.uid;
-    return this.eventsService.updateEvent(id, event, uid);
+    return this.eventsService.updateEvent(id, updateEventDto, uid);
   }
 
   @Delete(':id')

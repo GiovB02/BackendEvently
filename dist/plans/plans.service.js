@@ -60,21 +60,37 @@ let PlansService = PlansService_1 = class PlansService {
         }
     }
     createMockDb() {
-        const mockDoc = {
-            get: () => Promise.resolve({ exists: false, data: () => null }),
+        const mockPlan = {
+            id: 'mock-plan-id',
+            eventId: 'mock-event-id',
+            createdBy: 'mock-user-id',
+            invitedFriends: 1,
+            status: 'active',
+            invitedContacts: ['contact1@example.com'],
+        };
+        const mockEventDoc = {
+            get: () => Promise.resolve({ exists: true, data: () => ({ name: 'Mock Event' }) }),
+        };
+        const mockPlanDoc = {
+            get: () => Promise.resolve({ exists: true, data: () => mockPlan }),
             set: () => Promise.resolve(),
             update: () => Promise.resolve(),
             delete: () => Promise.resolve(),
-            id: 'mock-id',
+            id: 'mock-plan-id',
         };
-        const mockCollection = {
-            doc: () => mockDoc,
-            where: () => mockCollection,
-            get: () => Promise.resolve({ empty: true, docs: [] }),
-            add: () => Promise.resolve(mockDoc),
+        const collections = {
+            events: {
+                doc: () => mockEventDoc,
+            },
+            plans: {
+                doc: () => mockPlanDoc,
+                where: () => collections.plans,
+                get: () => Promise.resolve({ empty: false, docs: [{ data: () => mockPlan, id: 'mock-plan-id' }] }),
+                add: () => Promise.resolve(mockPlanDoc),
+            },
         };
         return {
-            collection: () => mockCollection,
+            collection: (name) => collections[name],
         };
     }
     async createPlan(eventId, createdBy, invitedContacts) {

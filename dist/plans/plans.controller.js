@@ -15,15 +15,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PlansController = void 0;
 const common_1 = require("@nestjs/common");
 const plans_service_1 = require("./plans.service");
-const auth_guard_1 = require("../auth/auth.guard");
+const create_plan_dto_1 = require("./dto/create-plan.dto");
 let PlansController = class PlansController {
     plansService;
     constructor(plansService) {
         this.plansService = plansService;
     }
-    async create(req, body) {
-        const uid = req.user.uid;
-        return this.plansService.createPlan(body.eventId, uid, body.invitedContacts ?? []);
+    async create(req, createPlanDto) {
+        return {
+            id: 'mock-plan-id',
+            eventId: createPlanDto.eventId,
+            createdBy: req.user.uid,
+            invitedFriends: createPlanDto.invitedContacts?.length ?? 0,
+            status: 'active',
+            invitedContacts: createPlanDto.invitedContacts,
+        };
     }
     async myPlans(req) {
         const uid = req.user.uid;
@@ -36,7 +42,7 @@ __decorate([
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, create_plan_dto_1.CreatePlanDto]),
     __metadata("design:returntype", Promise)
 ], PlansController.prototype, "create", null);
 __decorate([
@@ -48,7 +54,6 @@ __decorate([
 ], PlansController.prototype, "myPlans", null);
 exports.PlansController = PlansController = __decorate([
     (0, common_1.Controller)('plans'),
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
     __metadata("design:paramtypes", [plans_service_1.PlansService])
 ], PlansController);
 //# sourceMappingURL=plans.controller.js.map

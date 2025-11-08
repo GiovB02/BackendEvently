@@ -15,15 +15,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.EventsController = void 0;
 const common_1 = require("@nestjs/common");
 const events_service_1 = require("./events.service");
-const auth_guard_1 = require("../auth/auth.guard");
+const create_event_dto_1 = require("./dto/create-event.dto");
+const update_event_dto_1 = require("./dto/update-event.dto");
 let EventsController = class EventsController {
     eventsService;
     constructor(eventsService) {
         this.eventsService = eventsService;
     }
-    async createEvent(req, event) {
+    async createEvent(req, createEventDto) {
         const uid = req.user.uid;
-        return this.eventsService.createEvent(event, uid);
+        return this.eventsService.createEvent(createEventDto, uid);
     }
     async getEvents() {
         return this.eventsService.getEvents();
@@ -31,9 +32,9 @@ let EventsController = class EventsController {
     async getEvent(id) {
         return this.eventsService.getEvent(id);
     }
-    async updateEvent(req, id, event) {
+    async updateEvent(req, id, updateEventDto) {
         const uid = req.user.uid;
-        return this.eventsService.updateEvent(id, event, uid);
+        return this.eventsService.updateEvent(id, updateEventDto, uid);
     }
     async deleteEvent(req, id) {
         const uid = req.user.uid;
@@ -54,7 +55,7 @@ __decorate([
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, create_event_dto_1.CreateEventDto]),
     __metadata("design:returntype", Promise)
 ], EventsController.prototype, "createEvent", null);
 __decorate([
@@ -76,7 +77,7 @@ __decorate([
     __param(1, (0, common_1.Param)('id')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:paramtypes", [Object, String, update_event_dto_1.UpdateEventDto]),
     __metadata("design:returntype", Promise)
 ], EventsController.prototype, "updateEvent", null);
 __decorate([
@@ -105,7 +106,6 @@ __decorate([
 ], EventsController.prototype, "unattendEvent", null);
 exports.EventsController = EventsController = __decorate([
     (0, common_1.Controller)('events'),
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
     __metadata("design:paramtypes", [events_service_1.EventsService])
 ], EventsController);
 //# sourceMappingURL=events.controller.js.map

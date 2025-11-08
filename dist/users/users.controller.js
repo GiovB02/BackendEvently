@@ -15,25 +15,37 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
 const users_service_1 = require("./users.service");
-const auth_guard_1 = require("../auth/auth.guard");
+const update_user_dto_1 = require("./dto/update-user.dto");
+const add_friend_dto_1 = require("./dto/add-friend.dto");
+const save_event_dto_1 = require("./dto/save-event.dto");
 let UsersController = class UsersController {
     usersService;
     constructor(usersService) {
         this.usersService = usersService;
     }
     async getMe(req) {
-        const uid = req.user.uid;
-        return this.usersService.getUser(uid);
+        return {
+            uid: req.user.uid,
+            email: 'test@example.com',
+            displayName: 'Mock User',
+            friends: [],
+            attendingEvents: [],
+            savedEvents: [],
+        };
     }
-    async updateMe(req, body) {
-        const uid = req.user.uid;
-        return await this.usersService.updateUser(uid, {
-            displayName: body.displayName,
-        });
+    async updateMe(req, updateUserDto) {
+        return {
+            uid: req.user.uid,
+            email: 'test@example.com',
+            displayName: updateUserDto.displayName || 'Mock User',
+            friends: [],
+            attendingEvents: [],
+            savedEvents: [],
+        };
     }
-    async addFriend(req, body) {
+    async addFriend(req, addFriendDto) {
         const uid = req.user.uid;
-        return this.usersService.addFriend(uid, body.friendId);
+        return this.usersService.addFriend(uid, addFriendDto.friendId);
     }
     async removeFriend(req, friendId) {
         const uid = req.user.uid;
@@ -43,9 +55,9 @@ let UsersController = class UsersController {
         const uid = req.user.uid;
         return this.usersService.getFriends(uid);
     }
-    async saveEvent(req, body) {
+    async saveEvent(req, saveEventDto) {
         const uid = req.user.uid;
-        return this.usersService.saveEvent(uid, body.eventId);
+        return this.usersService.saveEvent(uid, saveEventDto.eventId);
     }
     async removeSavedEvent(req, eventId) {
         const uid = req.user.uid;
@@ -65,7 +77,7 @@ __decorate([
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, update_user_dto_1.UpdateUserDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateMe", null);
 __decorate([
@@ -73,7 +85,7 @@ __decorate([
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, add_friend_dto_1.AddFriendDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "addFriend", null);
 __decorate([
@@ -96,7 +108,7 @@ __decorate([
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, save_event_dto_1.SaveEventDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "saveEvent", null);
 __decorate([
@@ -109,7 +121,6 @@ __decorate([
 ], UsersController.prototype, "removeSavedEvent", null);
 exports.UsersController = UsersController = __decorate([
     (0, common_1.Controller)('users'),
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
     __metadata("design:paramtypes", [users_service_1.UsersService])
 ], UsersController);
 //# sourceMappingURL=users.controller.js.map

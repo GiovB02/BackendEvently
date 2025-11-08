@@ -43,6 +43,7 @@ const admin = __importStar(require("firebase-admin"));
 const platform_express_1 = require("@nestjs/platform-express");
 const node_fs_1 = __importDefault(require("node:fs"));
 const node_path_1 = __importDefault(require("node:path"));
+const common_1 = require("@nestjs/common");
 async function bootstrap() {
     if (admin.apps.length === 0) {
         try {
@@ -71,6 +72,7 @@ async function bootstrap() {
     }
     const server = (0, express_1.default)();
     const app = await core_1.NestFactory.create(app_module_1.AppModule, new platform_express_1.ExpressAdapter(server));
+    app.useGlobalPipes(new common_1.ValidationPipe());
     app.enableCors();
     const port = process.env.PORT ? Number(process.env.PORT) : 3001;
     await app.listen(port);

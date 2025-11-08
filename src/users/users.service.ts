@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { User } from '../models/evently.models';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -25,16 +26,29 @@ export class UsersService {
   }
 
   private createMockDb() {
+    const mockUser: User = {
+      uid: 'mock-user-id',
+      email: 'test@example.com',
+      displayName: 'Mock User',
+      friends: [],
+      attendingEvents: [],
+      savedEvents: [],
+    };
+
     const mockDoc = {
-      get: () => Promise.resolve({ exists: false, data: () => null }),
+      get: () => Promise.resolve({ exists: true, data: () => mockUser }),
       set: () => Promise.resolve(),
       update: () => Promise.resolve(),
       delete: () => Promise.resolve(),
     };
     const mockCollection = {
-      doc: () => mockDoc,
+      doc: (docId: string) => ({
+        ...mockDoc,
+        id: docId,
+      }),
       where: () => mockCollection,
-      get: () => Promise.resolve({ empty: true, docs: [] }),
+      get: () =>
+        Promise.resolve({ empty: false, docs: [{ data: () => mockUser }] }),
       add: () => Promise.resolve(mockDoc),
     };
     return {
@@ -47,7 +61,7 @@ export class UsersService {
     return userDoc.data() as User;
   }
 
-  async updateUser(uid: string, data: { displayName?: string }): Promise<User> {
+  async updateUser(uid: string, data: UpdateUserDto): Promise<User> {
     if (data.displayName !== undefined) {
       // Update display name in Firebase Auth
       await admin.auth().updateUser(uid, { displayName: data.displayName });
