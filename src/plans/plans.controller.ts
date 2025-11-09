@@ -13,15 +13,12 @@ export class PlansController {
     @Req() req: Request,
     @Body() createPlanDto: CreatePlanDto,
   ): Promise<Plan> {
-    // Bypassing service for testing purposes
-    return {
-      id: 'mock-plan-id',
-      eventId: createPlanDto.eventId,
-      createdBy: (req as any).user.uid,
-      invitedFriends: createPlanDto.invitedContacts?.length ?? 0,
-      status: 'active',
-      invitedContacts: createPlanDto.invitedContacts,
-    };
+    const uid = (req as any).user.uid;
+    return this.plansService.createPlan(
+      createPlanDto.eventId,
+      uid,
+      createPlanDto.invitedContacts ?? [],
+    );
   }
 
   @Get('me')

@@ -60,27 +60,16 @@ let UsersService = UsersService_1 = class UsersService {
         }
     }
     createMockDb() {
-        const mockUser = {
-            uid: 'mock-user-id',
-            email: 'test@example.com',
-            displayName: 'Mock User',
-            friends: [],
-            attendingEvents: [],
-            savedEvents: [],
-        };
         const mockDoc = {
-            get: () => Promise.resolve({ exists: true, data: () => mockUser }),
+            get: () => Promise.resolve({ exists: false, data: () => null }),
             set: () => Promise.resolve(),
             update: () => Promise.resolve(),
             delete: () => Promise.resolve(),
         };
         const mockCollection = {
-            doc: (docId) => ({
-                ...mockDoc,
-                id: docId,
-            }),
+            doc: () => mockDoc,
             where: () => mockCollection,
-            get: () => Promise.resolve({ empty: false, docs: [{ data: () => mockUser }] }),
+            get: () => Promise.resolve({ empty: true, docs: [] }),
             add: () => Promise.resolve(mockDoc),
         };
         return {

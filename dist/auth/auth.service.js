@@ -44,19 +44,27 @@ const common_1 = require("@nestjs/common");
 const admin = __importStar(require("firebase-admin"));
 let AuthService = class AuthService {
     async register(email, password, displayName) {
-        const userRecord = await admin.auth().createUser({
-            email,
-            password,
-            displayName,
-        });
-        const user = {
-            uid: userRecord.uid,
-            email: userRecord.email ?? '',
-            displayName: userRecord.displayName ?? '',
-            friends: [],
-        };
-        await admin.firestore().collection('users').doc(userRecord.uid).set(user);
-        return user;
+        try {
+            const userRecord = await admin.auth().createUser({
+                email,
+                password,
+                displayName,
+            });
+            const user = {
+                uid: userRecord.uid,
+                email: userRecord.email ?? '',
+                displayName: userRecord.displayName ?? '',
+                friends: [],
+            };
+            await admin.firestore().collection('users').doc(userRecord.uid).set(user);
+            return user;
+        }
+        catch (error) {
+            if (error.code === 'app/network-timeout') {
+                throw new common_1.HttpException('Connection to Firebase timed out. Please check your network connection.', common_1.HttpStatus.SERVICE_UNAVAILABLE);
+            }
+            throw new common_1.HttpException('An unexpected error occurred during registration.', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     async login(email, password) {
         const user = await admin.auth().getUserByEmail(email);

@@ -60,28 +60,16 @@ let EventsService = EventsService_1 = class EventsService {
         }
     }
     createMockDb() {
-        const mockEvent = {
-            id: 'mock-event-id',
-            name: 'Mock Event',
-            description: 'This is a mock event.',
-            date: new Date().toISOString(),
-            location: 'Mock Location',
-            creator: 'mock-user-id',
-            attendees: ['mock-user-id'],
-        };
         const mockDoc = {
-            get: () => Promise.resolve({ exists: true, data: () => mockEvent }),
+            get: () => Promise.resolve({ exists: false, data: () => null }),
             set: () => Promise.resolve(),
             update: () => Promise.resolve(),
             delete: () => Promise.resolve(),
         };
         const mockCollection = {
-            doc: (docId) => ({
-                ...mockDoc,
-                id: docId,
-            }),
+            doc: () => mockDoc,
             where: () => mockCollection,
-            get: () => Promise.resolve({ empty: false, docs: [{ data: () => mockEvent }] }),
+            get: () => Promise.resolve({ empty: true, docs: [] }),
             add: () => Promise.resolve(mockDoc),
         };
         return {

@@ -17,20 +17,10 @@ async function bootstrap() {
           credential: admin.credential.applicationDefault(),
         });
       } else {
-        // Fallback to local service account file for local development
-        // Ensure this file is NOT committed to version control
-        const keyPath = path.join(__dirname, '..', 'serviceAccountKey.json');
-        if (fs.existsSync(keyPath)) {
-          const raw = fs.readFileSync(keyPath, 'utf-8');
-          const serviceAccount = JSON.parse(raw) as admin.ServiceAccount;
-          admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
-          });
-        } else {
-          console.warn(
-            'No Firebase credentials found. Skipping initialization.',
-          );
-        }
+        // The GOOGLE_APPLICATION_CREDENTIALS environment variable is required.
+        console.error(
+          'Firebase credentials not found. Set the GOOGLE_APPLICATION_CREDENTIALS environment variable.',
+        );
       }
     } catch (e) {
       console.warn('Firebase Admin initialization skipped:', e);

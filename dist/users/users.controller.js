@@ -24,24 +24,12 @@ let UsersController = class UsersController {
         this.usersService = usersService;
     }
     async getMe(req) {
-        return {
-            uid: req.user.uid,
-            email: 'test@example.com',
-            displayName: 'Mock User',
-            friends: [],
-            attendingEvents: [],
-            savedEvents: [],
-        };
+        const uid = req.user.uid;
+        return this.usersService.getUser(uid);
     }
     async updateMe(req, updateUserDto) {
-        return {
-            uid: req.user.uid,
-            email: 'test@example.com',
-            displayName: updateUserDto.displayName || 'Mock User',
-            friends: [],
-            attendingEvents: [],
-            savedEvents: [],
-        };
+        const uid = req.user.uid;
+        return await this.usersService.updateUser(uid, updateUserDto);
     }
     async addFriend(req, addFriendDto) {
         const uid = req.user.uid;

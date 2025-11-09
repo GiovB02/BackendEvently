@@ -22,14 +22,8 @@ let PlansController = class PlansController {
         this.plansService = plansService;
     }
     async create(req, createPlanDto) {
-        return {
-            id: 'mock-plan-id',
-            eventId: createPlanDto.eventId,
-            createdBy: req.user.uid,
-            invitedFriends: createPlanDto.invitedContacts?.length ?? 0,
-            status: 'active',
-            invitedContacts: createPlanDto.invitedContacts,
-        };
+        const uid = req.user.uid;
+        return this.plansService.createPlan(createPlanDto.eventId, uid, createPlanDto.invitedContacts ?? []);
     }
     async myPlans(req) {
         const uid = req.user.uid;

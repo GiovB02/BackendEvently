@@ -21,15 +21,8 @@ export class UsersController {
 
   @Get('me')
   async getMe(@Req() req: Request): Promise<User> {
-    // Bypassing service for testing purposes
-    return {
-      uid: (req as any).user.uid,
-      email: 'test@example.com',
-      displayName: 'Mock User',
-      friends: [],
-      attendingEvents: [],
-      savedEvents: [],
-    };
+    const uid = (req as any).user.uid;
+    return this.usersService.getUser(uid);
   }
 
   @Put('me')
@@ -37,15 +30,8 @@ export class UsersController {
     @Req() req: Request,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<User> {
-    // Bypassing service for testing purposes
-    return {
-      uid: (req as any).user.uid,
-      email: 'test@example.com',
-      displayName: updateUserDto.displayName || 'Mock User',
-      friends: [],
-      attendingEvents: [],
-      savedEvents: [],
-    };
+    const uid = (req as any).user.uid;
+    return await this.usersService.updateUser(uid, updateUserDto);
   }
 
   @Post('friends')

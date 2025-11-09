@@ -23,41 +23,21 @@ export class PlansService {
   }
 
   private createMockDb() {
-    const mockPlan: Plan = {
-      id: 'mock-plan-id',
-      eventId: 'mock-event-id',
-      createdBy: 'mock-user-id',
-      invitedFriends: 1,
-      status: 'active',
-      invitedContacts: ['contact1@example.com'],
-    };
-
-    const mockEventDoc = {
-      get: () => Promise.resolve({ exists: true, data: () => ({ name: 'Mock Event' }) }),
-    };
-
-    const mockPlanDoc = {
-      get: () => Promise.resolve({ exists: true, data: () => mockPlan }),
+    const mockDoc = {
+      get: () => Promise.resolve({ exists: false, data: () => null }),
       set: () => Promise.resolve(),
       update: () => Promise.resolve(),
       delete: () => Promise.resolve(),
-      id: 'mock-plan-id',
+      id: 'mock-id',
     };
-
-    const collections = {
-      events: {
-        doc: () => mockEventDoc,
-      },
-      plans: {
-        doc: () => mockPlanDoc,
-        where: () => collections.plans,
-        get: () => Promise.resolve({ empty: false, docs: [{ data: () => mockPlan, id: 'mock-plan-id' }] }),
-        add: () => Promise.resolve(mockPlanDoc),
-      },
+    const mockCollection = {
+      doc: () => mockDoc,
+      where: () => mockCollection,
+      get: () => Promise.resolve({ empty: true, docs: [] }),
+      add: () => Promise.resolve(mockDoc),
     };
-
     return {
-      collection: (name: string) => collections[name],
+      collection: () => mockCollection,
     };
   }
 

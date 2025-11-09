@@ -41,8 +41,6 @@ const app_module_1 = require("./app.module");
 const express_1 = __importDefault(require("express"));
 const admin = __importStar(require("firebase-admin"));
 const platform_express_1 = require("@nestjs/platform-express");
-const node_fs_1 = __importDefault(require("node:fs"));
-const node_path_1 = __importDefault(require("node:path"));
 const common_1 = require("@nestjs/common");
 async function bootstrap() {
     if (admin.apps.length === 0) {
@@ -53,17 +51,7 @@ async function bootstrap() {
                 });
             }
             else {
-                const keyPath = node_path_1.default.join(__dirname, '..', 'serviceAccountKey.json');
-                if (node_fs_1.default.existsSync(keyPath)) {
-                    const raw = node_fs_1.default.readFileSync(keyPath, 'utf-8');
-                    const serviceAccount = JSON.parse(raw);
-                    admin.initializeApp({
-                        credential: admin.credential.cert(serviceAccount),
-                    });
-                }
-                else {
-                    console.warn('No Firebase credentials found. Skipping initialization.');
-                }
+                console.error('Firebase credentials not found. Set the GOOGLE_APPLICATION_CREDENTIALS environment variable.');
             }
         }
         catch (e) {

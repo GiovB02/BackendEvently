@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { User } from '../models/evently.models';
 
@@ -9,22 +9,35 @@ export class AuthService {
     password: string,
     displayName: string,
   ): Promise<User> {
-    const userRecord = await admin.auth().createUser({
-      email,
-      password,
-      displayName,
-    });
+    try {
+      const userRecord = await admin.auth().createUser({
+        email,
+        password,
+        displayName,
+      });
 
-    const user: User = {
-      uid: userRecord.uid,
-      email: userRecord.email ?? '',
-      displayName: userRecord.displayName ?? '',
-      friends: [],
-    };
+      const user: User = {
+        uid: userRecord.uid,
+        email: userRecord.email ?? '',
+        displayName: userRecord.displayName ?? '',
+        friends: [],
+      };
 
-    await admin.firestore().collection('users').doc(userRecord.uid).set(user);
+      await admin.firestore().collection('users').doc(userRecord.uid).set(user);
 
-    return user;
+      return user;
+    } catch (error) {
+      if (error.code === 'app/network-timeout') {
+        throw new HttpException(
+          'Connection to Firebase timed out. Please check your network connection.',
+          HttpStatus.SERVICE_UNAVAILABLE,
+        );
+      }
+      throw new HttpException(
+        'An unexpected error occurred during registration.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async login(email: string, password: string): Promise<{ token: string }> {
