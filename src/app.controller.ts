@@ -9,4 +9,11 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+
+  // 👇 Nuevo endpoint público
+  @Get('public')
+  getPublic() {
+    return { message: 'Conexión exitosa con el backend' };
+  }
 }
+
