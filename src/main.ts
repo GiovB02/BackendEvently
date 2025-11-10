@@ -1,27 +1,42 @@
+import * as path from 'path';
+import * as dotenv from 'dotenv';
+import * as admin from 'firebase-admin';
+import { readFileSync } from 'fs';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import express from 'express';
-import * as admin from 'firebase-admin';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
-  // Inicializa Firebase Admin SDK (usa GOOGLE_APPLICATION_CREDENTIALS)
   if (admin.apps.length === 0) {
     try {
-      if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-        admin.initializeApp({
-          credential: admin.credential.applicationDefault(),
-        });
-      } else {
-        console.error(
-          'Firebase credentials not found. Set the GOOGLE_APPLICATION_CREDENTIALS environment variable.',
-        );
+      const serviceAccountPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+      console.log('Loading Firebase credentials from:', serviceAccountPath);
+      
+      // Add validation
+      if (!serviceAccountPath) {
+        throw new Error('GOOGLE_APPLICATION_CREDENTIALS environment variable is not set');
       }
-    } catch (e) {
-      console.warn('Firebase Admin initialization skipped:', e);
+      
+      if (!require('fs').existsSync(serviceAccountPath)) {
+        throw new Error(`Firebase credentials file not found at: ${serviceAccountPath}`);
+      }
+      
+      const serviceAccount = JSON.parse(
+        readFileSync(serviceAccountPath, 'utf8')
+      );
+      
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+      });
+      console.log('Firebase Admin initialized successfully');
+    } catch (error) {
+      console.error('Firebase initialization error:', error);
+      process.exit(1);
     }
   }
+  // Inicializa Firebase Admin SDK (usa GOOGLE_APPLICATION_CREDENTIALS)
 
   const server = express();
   const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
@@ -42,5 +57,3 @@ async function bootstrap() {
 }
 
 void bootstrap();
-
-
